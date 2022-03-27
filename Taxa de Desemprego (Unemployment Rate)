@@ -1,0 +1,539 @@
+Trabalho de Econometria II 
+Aluna: Emili Veiga
+Taxa de Desemprego
+
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: i386-w64-mingw32/i386 (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Workspace loaded from ~/TrabalhoEcoII/.RData]
+
+> require(xlsx)
+Carregando pacotes exigidos: xlsx
+Carregando pacotes exigidos: rJava
+Carregando pacotes exigidos: xlsxjars
+> Tax <- read.xlsx(“TaxaDesemprego.xlsx”, sheetName = "ST")
+> Taxa <- ts(Tax, start = 2002.03, frequency = 12)
+> summary(Taxa)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  4.300   6.000   7.850   8.226  10.200  13.100 
+> View(Taxa)
+> ts.plot(Taxa[,2], ylab = "Taxa", xlab = "Data")
+ 
+
+
+> monthplot(Taxa[,2], ylab = "Taxa", xlab = "Data")
+ 
+> plot(decompose(Taxa[,2]))
+ 
+> require(TSA)
+
+Carregando pacotes exigidos: TSA
+Carregando pacotes exigidos: leaps
+Carregando pacotes exigidos: locfit
+locfit 1.5-9.1 	 2013-03-22
+Carregando pacotes exigidos: mgcv
+Carregando pacotes exigidos: nlme
+This is mgcv 1.8-12. For overview type 'help("mgcv-package")'.
+Carregando pacotes exigidos: tseries
+
+    ‘tseries’ version: 0.10-35
+
+    ‘tseries’ is a package for time series analysis and computational
+    finance.
+
+    See ‘library(help="tseries")’ for details.
+
+
+Attaching package: ‘TSA’
+
+The following objects are masked from ‘package:stats’:
+
+    acf, arima
+
+The following object is masked from ‘package:utils’:
+
+    Tar
+
+
+> acf(Taxa, lag.max = 55, drop.lag.0 = T)
+ 
+> require(urca)
+Carregando pacotes exigidos: urca
+> adf.drift <- ur.df(Taxa, c("drift"), lags = 24,
++        selectlags = "AIC")
+> acf(adf.drift@res, lag.max = 55, drop.lag.0 = T)
+ 
+> adf.drift@teststat
+               tau2     phi1
+statistic -1.994954 2.595627
+> adf.drift@cval
+      1pct  5pct 10pct
+tau2 -3.46 -2.88 -2.57
+phi1  6.52  4.63  3.81
+> summary(adf.drift)
+
+############################################### 
+# Augmented Dickey-Fuller Test Unit Root Test # 
+############################################### 
+
+Test regression drift 
+
+
+Call:
+lm(formula = z.diff ~ z.lag.1 + 1 + z.diff.lag)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.64793 -0.19741 -0.02102  0.18847  0.75967 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   0.156070   0.103736   1.504   0.1352    
+z.lag.1      -0.025859   0.012962  -1.995   0.0484 *  
+z.diff.lag1  -0.052079   0.084318  -0.618   0.5380    
+z.diff.lag2   0.020306   0.084303   0.241   0.8101    
+z.diff.lag3   0.069489   0.083413   0.833   0.4065    
+z.diff.lag4   0.005311   0.078793   0.067   0.9464    
+z.diff.lag5  -0.017085   0.079167  -0.216   0.8295    
+z.diff.lag6  -0.045714   0.079217  -0.577   0.5650    
+z.diff.lag7   0.026568   0.079210   0.335   0.7379    
+z.diff.lag8  -0.017664   0.078888  -0.224   0.8232    
+z.diff.lag9   0.039503   0.078237   0.505   0.6146    
+z.diff.lag10  0.022387   0.078064   0.287   0.7748    
+z.diff.lag11  0.031418   0.075713   0.415   0.6789    
+z.diff.lag12  0.345755   0.075684   4.568 1.23e-05 ***
+z.diff.lag13 -0.029295   0.078277  -0.374   0.7089    
+z.diff.lag14 -0.162714   0.079758  -2.040   0.0436 *  
+z.diff.lag15 -0.107435   0.080911  -1.328   0.1868    
+z.diff.lag16 -0.115885   0.082377  -1.407   0.1621    
+z.diff.lag17 -0.072703   0.082232  -0.884   0.3784    
+z.diff.lag18  0.015620   0.082174   0.190   0.8496    
+z.diff.lag19 -0.119609   0.081545  -1.467   0.1451    
+z.diff.lag20 -0.062129   0.082069  -0.757   0.4505    
+z.diff.lag21 -0.139468   0.081891  -1.703   0.0912 .  
+z.diff.lag22 -0.094083   0.082979  -1.134   0.2592    
+z.diff.lag23 -0.075995   0.082086  -0.926   0.3565    
+z.diff.lag24  0.345052   0.082006   4.208 5.08e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3086 on 117 degrees of freedom
+Multiple R-squared:  0.5944,	Adjusted R-squared:  0.5077 
+F-statistic: 6.857 on 25 and 117 DF,  p-value: 1.678e-13
+
+
+Value of test-statistic is: -1.995 2.5956 
+
+Critical values for test statistics: 
+      1pct  5pct 10pct
+tau2 -3.46 -2.88 -2.57
+phi1  6.52  4.63  3.81
+> ts.plot(diff(Taxa, lag = 1, differences = 1))
+ 
+
+>  Diff <- diff(Taxa, lag = 1, differences = 1)
+>  acf(Diff, lag.max = 55, drop.lag.0 = T)
+ 
+> NewDiff <- diff(log(Taxa), lag = 1, differences = 1)
+
+
+
+> acf(NewDiff, lag.max = 55, drop.lag.0 = T)
+ 
+> ts.plot(NewDiff)
+ 
+
+
+
+
+
+
+
+
+
+> NewDiff2 <- diff(NewDiff, lag = 12, differences = 1)
+> acf(NewDiff2, lag.max = 48, drop.lag.0 = T)
+ 
+
+> adf.drift2 <- ur.df(NewDiff2, type = "drift", lags = 24, selectlags = "AIC")
+> adf.drift2@teststat
+               tau2     phi1
+statistic -5.136943 13.27994
+> acf(adf.drift2@res, lag.max = 55, drop.lag.0 = T)
+ 
+
+> layout(1:2)
+> acf(NewDiff2, lag.max = 48, drop.lag.0 = T)
+> layout(1:2)
+> NewDiff2 <- diff(NewDiff, lag = 12, differences = 1)
+> acf(NewDiff2, lag.max = 48, drop.lag.0 = T)
+> pacf(NewDiff2, lag.max = 48)
+ 
+> fit.tax <- Arima(log(Taxa), order = c(1,1,1), seasonal = c(1,1,1), method = "ML", lambda = 0)
+> fit.tax
+Series: log(Taxa) 
+ARIMA(1,1,1)(1,1,1)[12]                    
+Box Cox transformation: lambda= 0 
+
+Coefficients:
+          ar1     ma1     sar1     sma1
+      -0.1587  0.1198  -0.0209  -0.7273
+s.e.   0.7426  0.7420   0.1295   0.1081
+
+sigma^2 estimated as 0.0004309:  log likelihood=378
+AIC=-746   AICc=-745.6   BIC=-730.78
+> t.test <- function(modelo_arima){
++ coef <- modelo_arima$coef
++ se <- sqrt(diag(modelo_arima$var.coef))
++ t <- abs(coef/se)
++ ok <- t > qt(0.975, length(modelo_arima$x) -
++ sum(modelo_arima$arma[c(1,2,3,4,6,7)]))
++ resul <- data.frame(Coef = coef, sd = se, t = t, rej_H0 = ok)
++ return(resul)
++ }
+> t.test(fit.tax)
+            Coef        sd         t rej_H0
+ar1  -0.15869086 0.7425513 0.2137103  FALSE
+ma1   0.11977817 0.7420360 0.1614183  FALSE
+sar1 -0.02086514 0.1294824 0.1611427  FALSE
+sma1 -0.72733764 0.1080514 6.7314025   TRUE
+> fit.tax <- Arima(Taxa, order = c(0,1,0), seasonal = c(0,1,1), method = "ML",
++                  lambda = 0)
+> fit.tax
+Series: Taxa 
+ARIMA(0,1,0)(0,1,1)[12]                    
+Box Cox transformation: lambda= 0 
+
+Coefficients:
+         sma1
+      -0.8358
+s.e.   0.0833
+
+sigma^2 estimated as 0.001374:  log likelihood=284.17
+AIC=-564.33   AICc=-564.25   BIC=-558.25
+> t.test(fit.tax)
+           Coef        sd        t rej_H0
+sma1 -0.8357766 0.0832623 10.03788   TRUE
+
+> diag <- tsdiag(fit.tax, gof.lag = 20)
+ 
+> Box.test(x = fit.tax$residuals, lag = 40,
++          type = "Ljung-Box", fitdf = 0)
+
+	Box-Ljung test
+
+data:  fit.tax$residuals
+X-squared = 45.135, df = 40, p-value = 0.266
+> require(FinTS)
+Carregando pacotes exigidos: FinTS
+
+Attaching package: ‘FinTS’
+
+The following object is masked from ‘package:forecast’:
+
+    Acf
+
+> ArchTest(fit.tax$residuals,lags = 12)
+
+	ARCH LM-test; Null hypothesis: no ARCH effects
+
+data:  fit.tax$residuals
+Chi-squared = 24.67, df = 12, p-value = 0.01646
+> require(normtest)
+Carregando pacotes exigidos: normtest
+Warning message:
+package ‘normtest’ was built under R version 3.3.2 
+> jb.norm.test(fit.tax$residuals, nrepl=2000)
+	Jarque-Bera test for normality
+
+data:  fit.tax$residuals
+JB = 3.0179, p-value = 0.173
+> plot(forecast(object = fit.tax, h=12, level = 0.95))
+ 
+> accuracy(fit.tax)
+                     ME      RMSE       MAE       MPE     MAPE
+Training set 0.01334142 0.2735191 0.2133308 0.1919257 2.773191
+                  MASE       ACF1
+Training set 0.2239542 0.03758126
+> require(BETS)
+Carregando pacotes exigidos: BETS
+
+    ‘mFilter’ version: 0.1-3
+
+    ‘mFilter’ is a package for time series filtering
+
+    See ‘library(help="mFilter")’ for details
+
+    Author: Mehmet Balcilar, mbalcilar@yahoo.com
+
+    ‘BETS’ version: 0.0.98
+
+    ‘BETS’ Brazilian Economic Time Series
+
+    See ‘library(help="BETS")’ for details
+
+    BugReports: https://github.com/pedrocostaferreira/BETS/issues
+> BETS.search("unemploy")
+Loading required package: DBI
+Loading required package: tcltk
+
+BETS-package: Found 30 out of 39073  time series.
+> TaxaBETS <- BETS.get(10777)
+> summary(TaxaBETS)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  4.600   5.900   8.000   8.319  10.320  13.100 
+> View(TaxaBETS)
+
+
+
+
+
+
+
+
+
+
+
+> ts.plot(TaxaBETS)
+ 
+> monthplot(TaxaBETS)
+ 
+> plot(decompose(TaxaBETS))
+ 
+
+
+
+
+
+
+
+
+> acf(TaxaBETS, lag.max = 55, drop.lag.0 = T)
+ 
+> adf.driftBETS <- ur.df(TaxaBETS, c("drift"), lags = 24,
++                           selectlags = "AIC")
+> acf(adf.driftBETS@res, lag.max = 55, drop.lag.0 = T)
+ 
+> adf.driftBETS@teststat
+               tau2     phi1
+statistic -3.007366 6.230824
+> adf.driftBETS@cval
+      1pct  5pct 10pct
+tau2 -3.46 -2.88 -2.57
+phi1  6.52  4.63  3.81
+> summary(adf.driftBETS)
+
+############################################### 
+# Augmented Dickey-Fuller Test Unit Root Test # 
+############################################### 
+
+Test regression drift 
+
+
+Call:
+lm(formula = z.diff ~ z.lag.1 + 1 + z.diff.lag)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.56178 -0.16357 -0.01742  0.14616  0.68551 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  0.177270   0.074240   2.388  0.01825 * 
+z.lag.1     -0.027816   0.009249  -3.007  0.00311 **
+z.diff.lag  -0.070439   0.081291  -0.867  0.38766   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2439 on 144 degrees of freedom
+Multiple R-squared:  0.06094,	Adjusted R-squared:  0.04789 
+F-statistic: 4.672 on 2 and 144 DF,  p-value: 0.01081
+
+
+Value of test-statistic is: -3.0074 6.2308 
+
+Critical values for test statistics: 
+      1pct  5pct 10pct
+tau2 -3.46 -2.88 -2.57
+phi1  6.52  4.63  3.81
+> ts.plot(diff(TaxaBETS, lag = 1, differences = 1))
+ 
+> DiffBETS <- diff(TaxaBETS, lag = 1, differences = 1)
+> acf(DiffBETS, lag.max = 55, drop.lag.0 = T)
+ 
+> NewDiffBETS <- diff(log(TaxaBETS), lag = 1, differences = 1)
+
+
+
+
+
+
+> acf(NewDiffBETS, lag.max = 55, drop.lag.0 = T)
+ 
+> ts.plot(NewDiffBETS)
+ 
+> NewDiffBETS2 <- diff(NewDiffBETS, lag = 12, differences = 1)
+> acf(NewDiffBETS2, lag.max = 48, drop.lag.0 = T)
+ 
+> adf.driftBETS2 <- ur.df(NewDiffBETS2, type = "drift", lags = 24, selectlags = "AIC")
+> adf.driftBETS2@teststat
+               tau2     phi1
+statistic -4.021196 8.105538
+
+
+
+> acf(adf.driftBETS2@res, lag.max = 55, drop.lag.0 = T)
+ 
+> layout(1:2)
+> NewDiffBETS2 <- diff(NewDiffBETS, lag = 12, differences = 1)
+> acf(NewDiffBETS2, lag.max = 48, drop.lag.0 = T)
+> pacf(NewDiffBETS2, lag.max = 48)
+ 
+> require(forecast)
+Carregando pacotes exigidos: forecast
+Carregando pacotes exigidos: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Carregando pacotes exigidos: timeDate
+
+Attaching package: ‘timeDate’
+
+The following objects are masked from ‘package:TSA’:
+
+    kurtosis, skewness
+
+This is forecast 7.3 
+
+
+Attaching package: ‘forecast’
+
+The following objects are masked from ‘package:TSA’:
+
+    fitted.Arima, plot.Arima
+
+The following object is masked from ‘package:nlme’:
+
+    getResponse
+> fit.taxBETS <- Arima(log(TaxaBETS), order = c(1,1,1), seasonal = c(1,1,1), method = "ML", lambda = 0)
+> fit.taxBETS
+Series: log(TaxaBETS) 
+ARIMA(1,1,1)(1,1,1)[12]                    
+Box Cox transformation: lambda= 0 
+
+Coefficients:
+          ar1     ma1     sar1     sma1
+      -0.2071  0.1094  -0.1430  -0.9999
+s.e.   0.3358  0.3337   0.0881   0.1501
+
+sigma^2 estimated as 0.0003359:  log likelihood=394.78
+AIC=-779.55   AICc=-779.16   BIC=-764.21
+
+> t.test <- function(modelo_arima){
++     coef <- modelo_arima$coef
++     se <- sqrt(diag(modelo_arima$var.coef))
++     t <- abs(coef/se)
++     ok <- t > qt(0.975, length(modelo_arima$x) -
++                        sum(modelo_arima$arma[c(1,2,3,4,6,7)]))
++     resul <- data.frame(Coef = coef, sd = se, t = t, rej_H0 = ok)
++     return(resul)
++     }
+> t.test(fit.taxBETS)
+           Coef         sd         t rej_H0
+ar1  -0.2071017 0.33582254 0.6166999  FALSE
+ma1   0.1094010 0.33374823 0.3277950  FALSE
+sar1 -0.1430458 0.08807869 1.6240683  FALSE
+sma1 -0.9998707 0.15011449 6.6607208   TRUE
+> fit.taxBETS <- Arima(TaxaBETS, order = c(0,1,0), seasonal = c(0,1,1), method = "ML",
++                                      lambda = 0)
+> fit.taxBETS
+Series: TaxaBETS 
+ARIMA(0,1,0)(0,1,1)[12]                    
+Box Cox transformation: lambda= 0 
+
+Coefficients:
+         sma1
+      -1.0000
+s.e.   0.0953
+
+sigma^2 estimated as 0.001292:  log likelihood=287.78
+AIC=-571.56   AICc=-571.49   BIC=-565.43
+> t.test(fit.taxBETS)
+          Coef         sd        t rej_H0
+sma1 -0.999998 0.09529261 10.49397   TRUE
+
+
+
+
+
+
+> diagBETS <- tsdiag(fit.taxBETS, gof.lag = 20)
+ 
+> Box.test(x = fit.taxBETS$residuals, lag = 40,
++                      type = "Ljung-Box", fitdf = 0)
+
+	Box-Ljung test
+
+data:  fit.taxBETS$residuals
+X-squared = 43.264, df = 40, p-value = 0.3338
+> require(FinTS)
+Carregando pacotes exigidos: FinTS
+
+Attaching package: ‘FinTS’
+
+The following object is masked from ‘package:forecast’:
+
+    Acf
+> ArchTest(fit.taxBETS$residuals,lags = 12)
+
+	ARCH LM-test; Null hypothesis: no ARCH effects
+
+data:  fit.taxBETS$residuals
+Chi-squared = 15.75, df = 12, p-value = 0.203
+> require(normtest)
+Carregando pacotes exigidos: normtest
+Warning message:
+package ‘normtest’ was built under R version 3.3.2 
+> jb.norm.test(fit.taxBETS$residuals, nrepl=2000)
+
+	Jarque-Bera test for normality
+
+data:  fit.taxBETS$residuals
+JB = 6.8186, p-value = 0.0375
+
+
+
+
+
+
+
+
+
+
+
+
+> plot(forecast(object = fit.taxBETS, h=12, level = 0.95))
+ 
+> accuracy(fit.taxBETS)
+                      ME      RMSE    MAE        MPE     MAPE      MASE       ACF1
+Training set 0.001598684 0.2821725 0.2068 0.06336677 2.611416 0.2204397 0.02759609
+
+
+
